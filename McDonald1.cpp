@@ -15,9 +15,10 @@
 
 void CD(const char* filePath) {
     //In c, successful processes will often return 0
-    //Here, if chdir (the c keyword to use Linux's "cd" command) is unsuccessful it will print an error message-
+    //Here, if chdir (the c keyword/call to use Linux's "cd" command) is unsuccessful it will print an error message-
     // - just like a Linux shell would. 
     if (chdir(filePath) != 0) {
+        //exact copy of Linux shell error message
         fprintf(stderr, "bash: cd: %s: No such file or directory\n", filePath);
     }
 }
@@ -59,6 +60,7 @@ void VI() {
 
 void RM(const char* fileName) {
     //Here we have another example of a successful process returning 0. 
+    //"remove" is c's call to the rm command in Linux shell
     if (remove(fileName) != 0) {
         fprintf(stderr, "bash: cd: %s: No such file or directory\n", fileName);
     } 
@@ -77,6 +79,7 @@ void CAT(const char* fileName) {
     
     std::string singleL;
     //Here this loop gets each line from the streamable file object, stores them temporarily in singleL and prints.
+    //Cannot just print out the ifstream object because it will come back as a weird code, it's a class.
     while (std::getline(file, singleL)) {
         std::cout << singleL << std::endl;
     }
@@ -91,10 +94,7 @@ void PS() {
         //Here we again see a new child process replacing the current image with a new one found at the path.
         execl("/bin/ps","ps","-e", nullptr);
         exit(1);
-    } else {
-    
-        wait(nullptr);
-    }
+    } else {wait(nullptr);}
 }
 
 
@@ -108,13 +108,14 @@ int main() {
         // print prompt
         char cwd[512];
         getcwd(cwd, sizeof(cwd));
+        //This prints out the current working directory, making it look like user is in a real shell. 
         std::cout << cwd << " $ ";
 
         // read input hopefully
         //.getline() stores the line in "input"
         std::cin.getline(input, sizeof(input));
           
-        //strtok divides input up into substrings, dividing where there are spaces.
+        //strtok divides input up into substrings, dividing where there are spaces. In other words it "tokenizes"
         //So "cd test.txt" would break up "cd" and "test.txt" into substrings so they can be used.
         char* token = strtok(input, " ");
         int i = 0;
@@ -126,9 +127,10 @@ int main() {
         }
         args[i] = nullptr;
 
-        // handle user input commands, tried to make it a switch but it wouldn't work
+        // handle user input commands, tried to make it a switch but it wouldn't work, something about non-convertable types. 
         //strcmp compares two strings, if they are identical it returns 0
         if (strcmp(args[0], "cd") == 0) {
+            //The syntax for a cd request is : "cd userInput." So I check the second location in args for the user input to give CD() method.
             CD(args[1]);
         } else if (strcmp(args[0], "ls") == 0) {
             LS();
@@ -140,12 +142,13 @@ int main() {
             CAT(args[1]);
         } else if (strcmp(args[0], "rm") == 0) {
             RM(args[1]);
+        //breaks from the while loop and the program then returns zero. Having it return 0 in the if statement might cause memory leak as while loop cuts off mid-function. 
         } else if (strcmp(args[0], "exit") == 0) {
             break;
         } else {
             std::cerr << args[0] << ": command not found " << std::endl;
         }
     }
-
+    //Return zero, shut off. 
     return 0;
 }
