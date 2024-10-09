@@ -17,9 +17,11 @@ void* thread_function(void* arg) {
 
     for (int i = 0; i < ITERATIONS; i++) {
         printf("I am thread %d.%ld\n", pid, thread_id);
+        usleep(100); // Add a small delay to avoid excessive interleaving
     }
     return NULL;
 }
+
 
 // Function to create threads in reverse order
 void create_threads_in_reverse() {
